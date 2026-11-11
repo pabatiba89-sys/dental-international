@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /assets/config.json
+Sitemap: https://dental-international-preview.soaringflute3.chatgpt.site/sitemap.xml

@@ -1,0 +1,25 @@
+{
+  "pages": 77,
+  "original_sitemap_paths": 76,
+  "missing_original_paths": [],
+  "static_html_assets_links_seo": "passed",
+  "browser_route_checks": 77,
+  "browser_title_fix_rechecked": true,
+  "browser_interactions_passed": [
+    "mobile navigation",
+    "blog category filter",
+    "blog search empty state",
+    "blog pagination",
+    "comparison slider keyboard",
+    "FAQ details",
+    "consultation validation and request preparation",
+    "motion scene modal and scene navigation",
+    "interface language toggle"
+  ],
+  "limitations": [
+    "Clinic delivery not configured",
+    "Editorial text remains English in other interface languages",
+    "No medical case photography or outcome testimonials included",
+    "Private preview: not eligible for public search indexing"
+  ]
+}
