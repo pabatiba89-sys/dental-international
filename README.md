@@ -23,17 +23,17 @@
 
 ## 部署到 Cloudflare Pages
 
-在已登录 GitHub 和 Wrangler 的电脑上，从仓库的 `main` 分支提交改动后运行：
+推送到 `main` 后，[GitHub Actions](https://github.com/pabatiba89-sys/dental-international/actions/workflows/pages-deployment.yml) 会构建网站、发布到现有 Cloudflare Pages 项目 `dental-international`，并核验线上页面、图片和 sitemap。
+
+在 `main` 提交改动后，可以直接运行 `git push origin main`。也可以在推送前检查当前提交的构建：
 
 ```bash
-bash scripts/publish.sh
+bash scripts/publish.sh --check
 ```
 
-脚本使用系统 Git 凭据推送到 `pabatiba89-sys/dental-international`，再用 Wrangler 已有登录上传到 Cloudflare Pages 的 `dental-international` 项目。首次发布时，按 Wrangler 提示选择已有的 Cloudflare 账号，并使用 `main` 作为生产分支。此流程采用直接上传，每次发布执行此脚本。
+`bash scripts/publish.sh` 可完成本地检查和推送。生产发布在 GitHub Actions 中执行，开发电脑只需 Git 和 Python 3。也可以在 Actions 中对 `main` 运行 **Run workflow** 重试。
 
-构建和线上检查以同一 Git 提交为准。生产地址默认是 `https://dental-international.pages.dev`。如果 Cloudflare 分配了其他地址，或已绑定正式域名，运行 `SITE_ORIGIN=https://你的域名 bash scripts/publish.sh`，使 canonical、分享链接、sitemap 和 robots.txt 指向生产地址。
-
-只检查当前提交的构建时，运行 `bash scripts/publish.sh --check`。这个命令只需要 Git 和 Python 3。正式发布还需要 Node.js 和 npx。凭据由电脑上的 Git 与 Wrangler 管理。发布约定见 `MEMORY.md`。
+首次启用时，在 GitHub 仓库的 **Settings → Secrets and variables → Actions** 设置变量 `CLOUDFLARE_ACCOUNT_ID` 和 Secret `CLOUDFLARE_API_TOKEN`。Token 限定在该 Cloudflare 账号，权限选 **Account → Cloudflare Pages → Edit**。生产地址默认为 `https://dental-international.pages.dev`。绑定正式域名后，设置仓库变量 `SITE_ORIGIN`，下次构建会用它生成 canonical、分享链接、sitemap 和 robots.txt。
 
 ## 动态交互
 

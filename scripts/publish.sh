@@ -13,7 +13,7 @@ fi
 
 project=dental-international
 export SITE_ORIGIN="${SITE_ORIGIN:-https://$project.pages.dev}"
-export GIT_TERMINAL_PROMPT=0 WRANGLER_SEND_METRICS=false
+export GIT_TERMINAL_PROMPT=0
 commit=$(git rev-parse HEAD)
 
 if [ "${1:-}" != --check ]; then
@@ -24,7 +24,6 @@ if [ "${1:-}" != --check ]; then
     https://github.com/pabatiba89-sys/dental-international|https://github.com/pabatiba89-sys/dental-international.git|git@github.com:pabatiba89-sys/dental-international.git|ssh://git@github.com/pabatiba89-sys/dental-international.git) ;;
     *) echo '请将 origin 的推送地址设为 pabatiba89-sys/dental-international。' >&2; exit 1 ;;
   esac
-  command -v npx >/dev/null || { echo '发布需要 Node.js 和 npx。' >&2; exit 1; }
 fi
 
 build_dir=$(mktemp -d "${TMPDIR:-/tmp}/dental-publish.XXXXXX")
@@ -41,9 +40,5 @@ git push origin "$commit:refs/heads/main"
 remote_commit=$(git ls-remote "$remote_url" refs/heads/main | cut -f1)
 [ "$remote_commit" = "$commit" ] || { echo '远端 main 与本次构建提交不一致，请重新检查。' >&2; exit 1; }
 echo "GitHub main 已确认：$commit"
-
-# Run outside the checkout so Wrangler uploads only the committed, rebuilt files.
-cd -- "$build_dir"
-npx --yes wrangler@4 pages deploy dist --project-name "$project" --branch main \
-  --commit-hash "$commit" --commit-message "Publish Dental International ${commit:0:7}"
-python3 scripts/verify_release.py . --live
+echo '推送到 main 会触发 GitHub Actions 部署。'
+echo '部署状态：https://github.com/pabatiba89-sys/dental-international/actions/workflows/pages-deployment.yml'

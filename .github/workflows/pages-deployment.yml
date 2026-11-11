@@ -1,0 +1,61 @@
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dental-international-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SITE_ORIGIN: ${{ vars.SITE_ORIGIN || 'https://dental-international.pages.dev' }}
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - name: Check out the release commit
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Build and verify static files
+        run: |
+          python3 build.py
+          python3 scripts/verify_release.py .
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Deploy to the existing Pages project
+        id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          latest_commit=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)
+          if [ "$latest_commit" != "$GITHUB_SHA" ]; then
+            echo "A newer commit is on main. Skipping this deployment."
+            exit 0
+          fi
+          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ] || [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error::Set the CLOUDFLARE_ACCOUNT_ID repository variable and CLOUDFLARE_API_TOKEN repository secret."
+            exit 1
+          fi
+          npx --yes wrangler@4.160.0 pages deploy dist \
+            --project-name=dental-international --branch=main --commit-hash="$GITHUB_SHA"
+          echo "published=true" >> "$GITHUB_OUTPUT"
+
+      - name: Verify production pages and assets
+        if: steps.pages.outputs.published == 'true'
+        run: python3 scripts/verify_release.py . --live
