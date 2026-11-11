@@ -40,8 +40,11 @@ def main():
 
 def check_live_file(origin, item):
     route, path = item
+    request = urllib.request.Request(
+        origin + route, headers={"User-Agent": "DentalInternationalRelease/1.0"}
+    )
     try:
-        with urllib.request.urlopen(origin + route, timeout=15) as response:
+        with urllib.request.urlopen(request, timeout=15) as response:
             if response.status != 200 or response.read() != path.read_bytes():
                 return f"{route} 与本次发布不一致"
     except OSError as error:
