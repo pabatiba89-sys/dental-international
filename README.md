@@ -23,17 +23,17 @@
 
 ## 部署到 Cloudflare Pages
 
-在 Cloudflare 控制台的 Workers & Pages 中创建 Pages 项目，连接 GitHub 仓库 `pabatiba89-sys/dental-international`。
+在已登录 GitHub 和 Wrangler 的电脑上，从仓库的 `main` 分支提交改动后运行：
 
-| 设置 | 值 |
-| --- | --- |
-| Production branch | `main` |
-| Framework preset | None |
-| Build command | `python3 build.py` |
-| Build output directory | `dist` |
-| Root directory | 仓库根目录 |
+```bash
+bash scripts/publish.sh
+```
 
-Pages 构建时会用项目域名生成 canonical、分享链接、sitemap 和 robots.txt。绑定自定义域名后，在 Pages 的构建环境变量中设置 `SITE_ORIGIN=https://你的域名` 并重新部署。原有 ChatGPT 私有预览仍有独立的访问入口。
+脚本使用系统 Git 凭据推送到 `pabatiba89-sys/dental-international`，再用 Wrangler 已有登录上传到 Cloudflare Pages 的 `dental-international` 项目。首次发布时，按 Wrangler 提示选择已有的 Cloudflare 账号，并使用 `main` 作为生产分支。此流程采用直接上传，每次发布执行此脚本。
+
+构建和线上检查以同一 Git 提交为准。生产地址默认是 `https://dental-international.pages.dev`。如果 Cloudflare 分配了其他地址，或已绑定正式域名，运行 `SITE_ORIGIN=https://你的域名 bash scripts/publish.sh`，使 canonical、分享链接、sitemap 和 robots.txt 指向生产地址。
+
+只检查当前提交的构建时，运行 `bash scripts/publish.sh --check`。这个命令只需要 Git 和 Python 3。正式发布还需要 Node.js 和 npx。凭据由电脑上的 Git 与 Wrangler 管理。发布约定见 `MEMORY.md`。
 
 ## 动态交互
 
